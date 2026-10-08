@@ -1,0 +1,114 @@
+name: Website
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Verify website
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run verify
+      - run: npm run build
+      - uses: actions/upload-artifact@v7
+        with:
+          name: website-${{ github.sha }}
+          if-no-files-found: error
+          path: |
+            release-output/*.tar.gz
+            release-output/SHA256SUMS
+  browsers:
+    name: Verify browsers
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run test:browsers:install
+      - run: npm run test:browsers
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: browser-proof-${{ github.sha }}
+          path: release-output/browser-proof
+          if-no-files-found: ignore
+  deploy:
+    name: Deploy website
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    needs: [verify, browsers]
+    runs-on: ubuntu-latest
+    concurrency:
+      group: website-production
+      cancel-in-progress: false
+    environment:
+      name: website-production
+      url: https://docviewkit.com
+    env:
+      SSH_HOST: ${{ secrets.DOCVIEWKIT_WEBSITE_SSH_HOST }}
+      SSH_USER: ${{ secrets.DOCVIEWKIT_WEBSITE_SSH_USER }}
+      SSH_PRIVATE_KEY: ${{ secrets.DOCVIEWKIT_WEBSITE_SSH_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DOCVIEWKIT_WEBSITE_SSH_KNOWN_HOSTS }}
+      REVISION: ${{ github.sha }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.sha }}
+          sparse-checkout: scripts/deploy-official-site.sh
+          sparse-checkout-cone-mode: false
+          path: deployment
+      - uses: actions/download-artifact@v8
+        with:
+          name: website-${{ github.sha }}
+          path: release-output
+      - name: Deploy the tested archive
+        run: |
+          test -n "$SSH_HOST"
+          test -n "$SSH_USER"
+          test -n "$SSH_PRIVATE_KEY"
+          test -n "$SSH_KNOWN_HOSTS"
+          (cd release-output && sha256sum -c SHA256SUMS)
+          install -d -m 700 "$HOME/.ssh"
+          printf '%s\n' "$SSH_PRIVATE_KEY" > "$HOME/.ssh/docviewkit-production"
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
+          chmod 600 "$HOME/.ssh/docviewkit-production" "$HOME/.ssh/known_hosts"
+          archive="docviewkit-website-$REVISION.tar.gz"
+          ssh_args=(-i "$HOME/.ssh/docviewkit-production" -p 21098 -o BatchMode=yes -o StrictHostKeyChecking=yes)
+          scp_args=(-i "$HOME/.ssh/docviewkit-production" -P 21098 -o BatchMode=yes -o StrictHostKeyChecking=yes)
+          ssh "${ssh_args[@]}" "$SSH_USER@$SSH_HOST" 'mkdir -p "$HOME/apps/docviewkit/uploads"'
+          scp "${scp_args[@]}" "release-output/$archive" "$SSH_USER@$SSH_HOST:apps/docviewkit/uploads/$archive"
+          ssh "${ssh_args[@]}" "$SSH_USER@$SSH_HOST" "bash -s -- '$REVISION' '$archive'" < deployment/scripts/deploy-official-site.sh
+      - name: Verify deployed commit and Viewer assets
+        run: |
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent --show-error -H 'Cache-Control: no-cache' https://docviewkit.com/site-version.json > site-version.json; then
+              actual_revision="$(node -p 'require("./site-version.json").revision')"
+              if [ "$actual_revision" = "$REVISION" ]; then
+                version="$(node -p 'require("./site-version.json").viewerVersion')"
+                actual_version="$(curl --fail --silent --show-error -H 'Cache-Control: no-cache' https://docviewkit.com/sdk/version.json | node -e 'let body="";process.stdin.on("data",chunk=>body+=chunk);process.stdin.on("end",()=>process.stdout.write(JSON.parse(body).version))')"
+                test "$version" = "$actual_version"
+                for path in /en/ /zh-cn/ /en/demo/ /zh-cn/demo/ /docs/licensing/ /sdk/LICENSE /sdk/NOTICE /sdk/office-viewer-xps.wasm /sdk/office-viewer-ofd.wasm "/sdk/v$version/office-viewer-xps.wasm" "/sdk/v$version/office-viewer-ofd.wasm"; do
+                  curl --fail --silent --show-error "https://docviewkit.com$path" >/dev/null
+                done
+                exit 0
+              fi
+            fi
+            sleep 10
+          done
+          echo "Official website did not switch to $REVISION" >&2
+          exit 1
