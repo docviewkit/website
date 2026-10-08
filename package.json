@@ -1,6 +1,6 @@
 {
   "name": "docviewkit-website",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "type": "module",
   "description": "DocViewKit website, documentation and online demo",
@@ -25,7 +25,7 @@
     "url": "git+https://github.com/docviewkit/website.git"
   },
   "dependencies": {
-    "@docviewkit/viewer": "0.2.75"
+    "@docviewkit/viewer": "0.2.76"
   },
   "devDependencies": {
     "playwright-core": "1.61.1"
