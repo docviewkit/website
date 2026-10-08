@@ -18,7 +18,7 @@ jobs:
       - name: Merge only the tested dependency commit and deploy main
         run: |
           [[ "$PR_NUMBER" =~ ^[0-9]+$ ]]
-          test "$(gh pr view "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --json author --jq .author.login)" = 'dependabot[bot]'
+          test "$(gh api "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER" --jq .user.login)" = 'dependabot[bot]'
           gh pr merge --repo "$GITHUB_REPOSITORY" --squash --match-head-commit "$HEAD_SHA" "$PR_NUMBER"
           gh workflow run ci.yml --repo "$GITHUB_REPOSITORY" --ref main
         env:
