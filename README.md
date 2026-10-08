@@ -1,5 +1,7 @@
 # DocViewKit website
 
+[English](https://github.com/docviewkit/website/blob/main/README.md) · [简体中文](https://github.com/docviewkit/website/blob/main/README.zh-CN.md)
+
 DocViewKit is a lightweight document viewer for everyday OA attachment previews, approval workflows, admin portals, CRM/ERP systems, cloud drives, and customer-facing apps, as well as enterprise SaaS, AI knowledge bases, legal review, and financial audit. Quick integration starts with the ready-made Viewer: import the component, mount `<docviewkit-viewer>`, and call `open(file)`. A compact core and on-demand format packs keep unused parsers out of the initial load, with no document-conversion server to deploy. Use the Engine API when you need custom rendering or source-object access.
 
 This website source lives in [docviewkit/website](https://github.com/docviewkit/website) and uses [Apache-2.0](LICENSE). The Viewer and Engine source lives in [docviewkit/viewer](https://github.com/docviewkit/viewer). It presents the open source Viewer and Engine plus optional support, customization and enterprise delivery. These terms apply to releases built from this source; older published versions retain their included licenses. DocViewKit Omni retains its separately documented product license.
