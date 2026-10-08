@@ -22,6 +22,12 @@ test("website and dependency READMEs retain Apache-2.0 and direct service contac
   const source = await text("README.md");
   assert.match(source, /git clone https:\/\/github\.com\/docviewkit\/website\.git/);
   assert.match(source, /npm ci/);
+  const chinese = await text("README.zh-CN.md");
+  assert.ok(source.includes("[简体中文](https://github.com/docviewkit/website/blob/main/README.zh-CN.md)"));
+  assert.ok(chinese.includes("[English](https://github.com/docviewkit/website/blob/main/README.md)"));
+  for (const term of ["Apache-2.0", "OFD", "Electron", "Tauri", "WebView", "支持、定制和企业交付", "独立", "npm ci", "git clone https://github.com/docviewkit/website.git"]) assert.ok(chinese.includes(term), term);
+  assert.match(chinese, /https:\/\/github\.com\/docviewkit\/viewer/u);
+  assert.match(chinese, /mailto:novalag778@gmail\.com/u);
   assert.match(await text("node_modules/@docviewkit/viewer/README.md"), /<docviewkit-viewer><\/docviewkit-viewer>/);
 });
 
