@@ -79,7 +79,7 @@ npm run test:browsers
 
 ## 部署与 Viewer 升级
 
-提交到 `main` 后，自动验证官网，在 Chromium、Firefox 和 WebKit 中检查真实 Demo，再将已测试归档部署到官网。文档和 `/sdk/version.json` 使用实际安装的 Viewer 版本，`/site-version.json` 记录官网版本、部署提交与 Viewer 版本。
+提交到 `main` 后，自动验证官网，在 Chromium 和 WebKit 中检查真实 Demo，再将已测试归档部署到官网。文档和 `/sdk/version.json` 使用实际安装的 Viewer 版本，`/site-version.json` 记录官网版本、部署提交与 Viewer 版本。
 
 `website-production` 环境保存 `DOCVIEWKIT_WEBSITE_SSH_HOST`、`DOCVIEWKIT_WEBSITE_SSH_USER`、`DOCVIEWKIT_WEBSITE_SSH_PRIVATE_KEY` 和 `DOCVIEWKIT_WEBSITE_SSH_KNOWN_HOSTS`。SSH 使用端口 `21098`。现有 Namecheap Node.js 应用目录为 `apps/docviewkit`，启动文件为 `server.js`。部署保留历史版本用于回滚，保护归档数据，并通过 `tmp/restart.txt` 重启 Passenger。
 
