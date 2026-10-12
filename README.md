@@ -69,7 +69,7 @@ The Viewer and Engine are Apache-2.0 open source and require no runtime license.
 
 ## Deployment and core updates
 
-Pushes to `main` verify the website, check the real Demo in Chromium, Firefox and WebKit, and deploy the tested archive to `docviewkit.com`. The website has its own version; documentation and `/sdk/version.json` use the installed Viewer version. `/site-version.json` records the deployed website commit and Viewer version.
+Pushes to `main` verify the website, check the real Demo in Chromium and WebKit, and deploy the tested archive to `docviewkit.com`. The website has its own version; documentation and `/sdk/version.json` use the installed Viewer version. `/site-version.json` records the deployed website commit and Viewer version.
 
 The `website-production` environment holds `DOCVIEWKIT_WEBSITE_SSH_HOST`, `DOCVIEWKIT_WEBSITE_SSH_USER`, `DOCVIEWKIT_WEBSITE_SSH_PRIVATE_KEY` and `DOCVIEWKIT_WEBSITE_SSH_KNOWN_HOSTS`. SSH uses port `21098`. The existing Namecheap Node.js 24 application root remains `apps/docviewkit`, with `server.js` as its startup file. Deployment retains releases for rollback, preserves archived data, and restarts Passenger through `tmp/restart.txt`.
 

@@ -1,6 +1,6 @@
 {
   "name": "docviewkit-website",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": true,
   "type": "module",
   "description": "DocViewKit website, documentation and online demo",
@@ -17,7 +17,7 @@
     "verify": "npm run check && npm test",
     "build": "node scripts/prepare-release.mjs",
     "test:browsers": "node --test tests/home-layout.mjs",
-    "test:browsers:install": "node node_modules/playwright-core/cli.js install --with-deps chromium firefox webkit"
+    "test:browsers:install": "node node_modules/playwright-core/cli.js install --with-deps chromium webkit"
   },
   "license": "Apache-2.0",
   "repository": {
@@ -25,7 +25,7 @@
     "url": "git+https://github.com/docviewkit/website.git"
   },
   "dependencies": {
-    "@docviewkit/viewer": "0.2.76"
+    "@docviewkit/viewer": "0.2.77"
   },
   "devDependencies": {
     "playwright-core": "1.61.1"

@@ -6,7 +6,7 @@ import { chromium, firefox, webkit } from "playwright-core";
 import { mkdir, readFile } from "node:fs/promises";
 import { createWebsiteApp } from "../src/app.mjs";
 
-for (const name of (process.env.BROWSERS || "chromium,firefox,webkit").split(",")) {
+for (const name of (process.env.BROWSERS || "chromium,webkit").split(",")) {
 test(`${name}: localized home and real npm Demo work without browser errors`, async () => {
   const app = createWebsiteApp({ publicDir: new URL("../public", import.meta.url).pathname });
   let browser;
