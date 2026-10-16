@@ -28,8 +28,12 @@ const PUBLIC_SDK_ASSETS = new Set([
   "worker.js",
   "image-codec-worker.js",
   "extended-formats.js",
+  "wps-formats.js",
+  "xps-formats.js",
+  "ofd-formats.js",
   "types.js",
   "office-viewer-core.wasm",
+  "office-viewer-calc.wasm",
   "office-viewer-odf.wasm",
   "office-viewer-legacy-office.wasm",
   "office-viewer-pdf.wasm",
@@ -37,9 +41,12 @@ const PUBLIC_SDK_ASSETS = new Set([
   "office-viewer-ofd.wasm",
   "lcms.wasm",
   "resvg.wasm",
+  "jxr_dec.wasm",
+  "openjpeg.wasm",
   "version.json",
   "third-party-licenses/Carlito-1.103-LICENSE.txt",
   "third-party-licenses/Caladea-1.002-LICENSE.txt",
+  "third-party-licenses/mtx-decompressor-1.6.0-modified.mjs",
 ]);
 
 function securityHeaders(contentType, { allowWasm = false, allowInlineStyle = false } = {}) {
