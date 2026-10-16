@@ -66,6 +66,26 @@ test("Apache-2.0 SDK assets stay public without accounts or signing keys", async
   }
 });
 
+test("installed npm runtime assets remain downloadable through both SDK routes", async (t) => {
+  const { baseUrl } = await startApp(t);
+  const runtime = new URL("../node_modules/@docviewkit/viewer/", import.meta.url);
+  const assets = (await readdir(runtime)).filter((name) => /\.(?:js|wasm)$/u.test(name));
+  assets.push("third-party-licenses/mtx-decompressor-1.6.0-modified.mjs");
+  const missing = [];
+  for (const asset of assets) {
+    const expected = await readFile(new URL(asset, runtime));
+    for (const prefix of ["/sdk/", `/sdk/v${packageVersion}/`]) {
+      const path = `${prefix}${asset}`;
+      const response = await fetch(`${baseUrl}${path}`);
+      if (response.status !== 200) { missing.push(path); continue; }
+      assert.deepEqual(Buffer.from(await response.arrayBuffer()), expected, path);
+      assert.equal(response.headers.get("cache-control"), prefix === "/sdk/" ? "no-cache" : "public, max-age=31536000, immutable", path);
+      if (asset.endsWith(".wasm")) assert.equal(response.headers.get("content-type"), "application/wasm", path);
+    }
+  }
+  assert.deepEqual(missing, [], "Every installed runtime module, codec and modified MPL source must be served");
+});
+
 test("SDK serves only approved bundled fonts and their licenses with versioned caching", async (t) => {
   const { baseUrl } = await startApp(t);
   for (const [family, version] of [["Carlito", "1.103"], ["Caladea", "1.002"]]) {
