@@ -59,6 +59,10 @@ for (const engine of [chromium, webkit]) {
         viewport: innerWidth,
         bottom: header.getBoundingClientRect().bottom,
         menuTop: document.querySelector("#primary-nav").getBoundingClientRect().top,
+        overflowing: [...document.querySelectorAll("body *")].filter(el => {
+          const rect = el.getBoundingClientRect();
+          return rect.width && rect.right > innerWidth && !el.closest("pre, .command-line");
+        }).map(el => ({ tag: el.tagName, class: el.className, text: el.textContent.trim().slice(0, 50), right: el.getBoundingClientRect().right })).slice(0, 20),
       }));
       assert.ok(bounds.width <= bounds.viewport, JSON.stringify(bounds));
       assert.ok(bounds.menuTop >= bounds.bottom, JSON.stringify(bounds));
