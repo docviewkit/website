@@ -118,7 +118,7 @@ export function renderDocsPage(baseUrl, slug) {
   <title>${escapeHtml(pageTitle)}</title>
   <link rel="canonical" href="${canonical}">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="/assets/styles.css?v=20261116-1">
+  <link rel="stylesheet" href="/assets/styles.css?v=20261116-2">
   <script type="application/ld+json">${structuredData}</script>
   <script type="module" src="/assets/site.js?v=20261116-1"></script>
   <script type="module" src="/assets/docs.js?v=20260817-1"></script>
