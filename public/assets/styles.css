@@ -398,7 +398,8 @@ pre,
 }
 
 .hero-copy,
-.section-heading > * {
+.section-heading > *,
+.final-cta-grid > div {
   min-width: 0;
   overflow-wrap: anywhere;
 }
