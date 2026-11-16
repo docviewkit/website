@@ -2,15 +2,26 @@ const sidebar = document.getElementById("docs-sidebar");
 const menuButton = document.querySelector("[data-docs-menu]");
 const searchInput = document.getElementById("docs-search-input");
 
+function closeSidebar() {
+  sidebar?.classList.remove("open");
+  menuButton?.setAttribute("aria-expanded", "false");
+}
+
 menuButton?.addEventListener("click", () => {
   const open = sidebar?.classList.toggle("open") || false;
   menuButton.setAttribute("aria-expanded", String(open));
+  if (open) searchInput?.focus();
 });
 
 sidebar?.addEventListener("click", (event) => {
-  if (!event.target.closest("a")) return;
-  sidebar.classList.remove("open");
-  menuButton?.setAttribute("aria-expanded", "false");
+  if (event.target.closest("a")) closeSidebar();
+});
+
+document.addEventListener("keydown", event => {
+  if (event.key === "Escape" && !event.isComposing && event.keyCode !== 229 && sidebar?.classList.contains("open")) {
+    closeSidebar();
+    menuButton?.focus();
+  }
 });
 
 searchInput?.addEventListener("input", () => {

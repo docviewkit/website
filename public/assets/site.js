@@ -18,6 +18,77 @@ function applyTheme(theme) {
 initializeI18n();
 applyTheme(initialTheme());
 
+// Keep one navigation tree: inline when it fits, native light-dismiss when compact.
+const menuButton = document.querySelector("[data-menu-toggle]");
+const menu = document.getElementById(menuButton?.getAttribute("aria-controls"));
+if (menu && menuButton) {
+  const header = menu.closest(".site-header");
+  const row = menu.closest(".site-nav");
+  const nativePopover = "popover" in HTMLElement.prototype;
+  let previousWidth = 0;
+  const isOpen = () => nativePopover ? menu.matches(":popover-open") : menu.classList.contains("open");
+  const close = () => {
+    if (nativePopover && isOpen()) menu.hidePopover();
+    menu.classList.remove("open");
+    menuButton.setAttribute("aria-expanded", "false");
+  };
+  const position = () => header.style.setProperty("--nav-menu-top", `${header.getBoundingClientRect().bottom + 8}px`);
+  const layout = () => {
+    const width = row.clientWidth;
+    if (header.dataset.navLayout === "compact" && width <= previousWidth) {
+      previousWidth = width;
+      position();
+      return;
+    }
+    previousWidth = width;
+    const open = isOpen();
+    const focused = document.activeElement;
+    menu.removeAttribute("popover");
+    header.dataset.navLayout = "wide";
+    const compact = row.scrollWidth > width;
+    header.dataset.navLayout = compact ? "compact" : "wide";
+    menu.classList.remove("open");
+    if (compact && nativePopover) {
+      menu.setAttribute("popover", "auto");
+      menuButton.setAttribute("popovertarget", menu.id);
+      if (open) {
+        menu.showPopover({ source: menuButton });
+        if (menu.contains(focused)) focused.focus({ preventScroll: true });
+      }
+    } else {
+      menuButton.removeAttribute("popovertarget");
+      if (compact && open) menu.classList.add("open");
+    }
+    menuButton.setAttribute("aria-expanded", String(compact && open));
+    if (!compact && focused === menuButton) menu.querySelector("a")?.focus();
+    else if (compact && !open && menu.contains(focused)) menuButton.focus();
+    position();
+  };
+  menu.addEventListener("toggle", () => menuButton.setAttribute("aria-expanded", String(isOpen())));
+  menu.addEventListener("click", event => { if (event.target.closest("a")) close(); });
+  if (!nativePopover) {
+    menuButton.addEventListener("click", () => {
+      const open = menu.classList.toggle("open");
+      menuButton.setAttribute("aria-expanded", String(open));
+      if (open) menu.querySelector("a")?.focus();
+    });
+    document.addEventListener("click", event => {
+      if (isOpen() && !menu.contains(event.target) && !menuButton.contains(event.target)) close();
+    });
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape" && isOpen()) { close(); menuButton.focus(); }
+    });
+  }
+  layout();
+  let layoutFrame = 0;
+  const observer = new ResizeObserver(() => {
+    if (layoutFrame) return;
+    layoutFrame = requestAnimationFrame(() => { layoutFrame = 0; layout(); });
+  });
+  observer.observe(row);
+  observer.observe(menu);
+}
+
 document.addEventListener("click", async (event) => {
   const themeButton = event.target.closest("[data-theme-toggle]");
   if (themeButton) {
@@ -25,20 +96,6 @@ document.addEventListener("click", async (event) => {
     localStorage.setItem(storageKey, theme);
     applyTheme(theme);
     return;
-  }
-
-  const menuButton = event.target.closest("[data-menu-toggle]");
-  if (menuButton) {
-    const menu = document.getElementById(menuButton.getAttribute("aria-controls"));
-    const open = menu?.classList.toggle("open") || false;
-    menuButton.setAttribute("aria-expanded", String(open));
-    return;
-  }
-
-  const navLink = event.target.closest("#primary-nav a");
-  if (navLink) {
-    document.getElementById("primary-nav")?.classList.remove("open");
-    document.querySelector("[data-menu-toggle]")?.setAttribute("aria-expanded", "false");
   }
 
   const copyButton = event.target.closest("[data-copy-target]");

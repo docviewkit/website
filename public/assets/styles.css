@@ -71,7 +71,7 @@ body {
   background: var(--surface-page);
   color: var(--text);
   font-family: var(--font-sans);
-  font-size: 16px;
+  font-size: 1rem;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
@@ -777,6 +777,8 @@ pre,
 
 .plan-card {
   display: flex;
+  min-width: 0;
+  overflow-wrap: anywhere;
   min-height: 440px;
   flex-direction: column;
   padding: 30px;
@@ -1882,6 +1884,39 @@ pre,
   display: none;
 }
 
+/* Let translated links and enlarged text determine when the row collapses. */
+.site-header[data-nav-layout] .site-nav > *,
+.site-header[data-nav-layout] .nav-links .nav-link {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.site-header[data-nav-layout="compact"] { height: auto; }
+.site-header[data-nav-layout="compact"] .site-nav {
+  min-height: var(--header-height);
+  height: auto;
+  flex-wrap: wrap;
+}
+.site-header[data-nav-layout="compact"] .nav-actions { margin-inline-start: auto; }
+.site-header[data-nav-layout="compact"] .menu-button { display: inline-grid; }
+.site-header[data-nav-layout="compact"] .nav-links {
+  position: fixed;
+  inset: var(--nav-menu-top, calc(var(--header-height) + 8px)) 20px auto;
+  width: auto;
+  max-height: calc(100dvh - var(--nav-menu-top, var(--header-height)) - 16px);
+  overflow: auto;
+  overscroll-behavior: contain;
+  display: none;
+  margin: 0;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow-md);
+}
+.site-header[data-nav-layout="compact"] .nav-links:is(:popover-open, .open) { display: grid; }
+.site-header[data-nav-layout="compact"] .nav-links .nav-link { width: 100%; }
+
 @media (max-width: 1100px) {
   .hero-grid {
     grid-template-columns: 1fr;
@@ -1906,31 +1941,6 @@ pre,
 }
 
 @media (max-width: 840px) {
-  .nav-links {
-    position: fixed;
-    left: 20px;
-    right: 20px;
-    top: calc(var(--header-height) + 8px);
-    display: none;
-    padding: 10px;
-    border: 1px solid var(--line);
-    border-radius: var(--radius-md);
-    background: var(--surface);
-    box-shadow: var(--shadow-md);
-  }
-
-  .nav-links.open {
-    display: grid;
-  }
-
-  .nav-links .nav-link {
-    width: 100%;
-  }
-
-  .menu-button {
-    display: inline-grid;
-  }
-
   .nav-actions .button {
     display: none;
   }
@@ -1969,11 +1979,13 @@ pre,
     inset: var(--header-height) auto 0 0;
     z-index: 40;
     width: min(88vw, 320px);
+    visibility: hidden;
     transform: translateX(-102%);
     transition: transform 200ms ease-out;
   }
 
   .docs-sidebar.open {
+    visibility: visible;
     transform: translateX(0);
   }
 
